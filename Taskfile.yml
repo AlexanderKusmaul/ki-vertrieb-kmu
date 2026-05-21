@@ -1,0 +1,24 @@
+version: '3'
+
+tasks:
+  pull:
+    cmds:
+      - python3 code/01_pull_data.py
+
+  clean:
+    deps: [pull]
+    cmds:
+      - python3 code/02_clean.py
+
+  descriptives:
+    deps: [clean]
+    cmds:
+      - python3 code/03_descriptives.py
+
+  regression:
+    deps: [descriptives]
+    cmds:
+      - python3 code/04_regression.py
+
+  all:
+    deps: [regression]
