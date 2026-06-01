@@ -1,11 +1,7 @@
-.venv/
-data/raw/
 .env
-references/*.pdf
-_pycache_/
-*.pyc
-*.log
-*.tex
-.ipynb_checkpoints/
+data/raw/
+data/processed/
+*.parquet
+.venv/
 .DS_Store
-Thumbs.db
+__pycache__/
