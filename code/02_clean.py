@@ -51,3 +51,25 @@ Columns:     {len(df.columns)}
 """
 (OUT / "clean_log.txt").write_text(log)
 print("Done.")
+
+# ── SME filter (EU definition: fewer than 250 employees) ─────────────────────
+if "emp" in df.columns:
+    df = df[df["emp"] < 0.25]
+    print(f"SME rows (emp < 0.25): {len(df):,}")
+
+# ── Compute derived variables ─────────────────────────────────────────────────
+# Y: Return on Assets
+df["roa"] = df["nicon"] / df["at"]
+
+# X: R&D Intensity
+df["rd_intensity"] = df["xrd"] / df["at"]
+
+# Controls
+import numpy as np
+df["log_at"] = np.log(df["at"].replace(0, float("nan")))
+df["leverage"] = (df["dltt"] + df["dlc"]) / df["seq"]
+df["sales_growth"] = df.sort_values("fyear").groupby("gvkey")["sale"].pct_change()
+
+# ── Save updated panel ────────────────────────────────────────────────────────
+df.to_parquet(out_file, index=False)
+print(f"Variables added: roa, rd_intensity, log_at, leverage, sales_growth")
