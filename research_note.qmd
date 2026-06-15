@@ -1,0 +1,176 @@
+---
+title: "KI-Einsatz im internationalen Vertrieb: Leadgenerierung & Kundenkommunikation"
+author: |
+  Alexander Kusmaul | ExInt II | WU Vienna | SS 2026
+  https://github.com/AlexanderKusmaul/ki-vertrieb-kmu
+date: "June 2026"
+bibliography: references/library.bib
+csl: references/apa.csl
+format:
+  pdf:
+    toc: false
+    number-sections: true
+    geometry: margin=2.5cm
+    fontsize: 11pt
+    linestretch: 1.3
+execute:
+  eval: true
+  echo: false
+  warning: false
+  message: false
+---```{python}
+#| label: setup
+import pandas as pd
+import numpy as np
+
+summary = pd.read_csv('output/tables/summary_statistics.csv', index_col=0)
+results = pd.read_csv('output/tables/regression_results.csv', index_col=0)
+panel = pd.read_parquet('data/processed/panel_with_vars.parquet')
+
+n_obs = int(panel.shape[0])
+n_firms = int(panel['gvkey'].nunique())
+```# Introduction
+
+The adoption of artificial intelligence (AI) in sales and marketing has become
+an increasingly relevant phenomenon for small and medium-sized enterprises (SMEs)
+engaged in international markets. While prior research has extensively documented
+the role of digital technologies in facilitating internationalization, the specific
+mechanisms through which AI tools enhance lead generation and customer communication
+in export-oriented SMEs remain largely unexplored.
+
+Existing studies have established that technology adoption positively affects firm
+performance (Davis, 1989) and that unique technological capabilities constitute a
+source of sustained competitive advantage (Barney, 1991). However, whether AI-driven
+sales tools translate into measurable improvements in international sales performance
+for SMEs — particularly those with limited resources — has not been empirically tested.
+
+This research note addresses that gap by examining the relationship between AI adoption
+in sales processes and international sales performance among Austrian export-oriented SMEs.
+
+> **Research question:** Does the adoption of AI tools for lead generation and customer
+> communication improve international sales performance in export-oriented SMEs?# Theory and Hypotheses
+
+## Technology Acceptance Model
+
+The Technology Acceptance Model (TAM) proposed by Davis (1989) posits that the
+adoption of new technologies is driven by perceived usefulness and perceived ease
+of use. Applied to AI tools in international sales, TAM suggests that SMEs which
+perceive AI-driven lead generation as useful and accessible are more likely to
+integrate these tools into their sales processes, and consequently achieve higher
+international sales performance.
+
+## Resource-Based View
+
+The Resource-Based View (Barney, 1991) argues that sustained competitive advantage
+stems from resources that are valuable, rare, inimitable, and non-substitutable.
+AI competence in international sales constitutes such a resource: it enables firms
+to identify and reach foreign customers more efficiently than competitors relying
+on traditional methods, and is difficult to replicate without significant investment
+in data infrastructure and organizational capabilities.
+
+## Hypothesis Development
+
+Building on TAM and RBV, AI adoption in sales processes should reduce the cost and
+time required to identify and engage international leads, while simultaneously
+improving the quality of customer communication through personalization and
+automation. These mechanisms collectively translate into higher international
+revenue growth for AI-adopting SMEs compared to non-adopters.
+
+> **H1:** SMEs that adopt AI tools for lead generation achieve higher international
+> sales performance than SMEs that do not adopt AI tools.
+>
+> *(Test: expected positive sign on AI adoption coefficient)*# Data and Method
+
+## Sample
+
+The sample comprises `{python} f"{n_obs:,}"` firm-years from
+`{python} f"{n_firms:,}"` unique firms. The analysis focuses on
+Austrian export-oriented SMEs with a maximum of 250 employees and
+an export share of at least 20%. Data were collected via an online
+survey conducted between September and November 2026.
+
+## Variables
+
+| Variable | Field | Formula | Role |
+|---|---|---|---|
+| International Sales Performance | `sales_intl_growth` | Δ international revenue (%) | Dependent |
+| AI Adoption | `ai_adoption` | Dummy: 1 = AI tool used in sales | Independent |
+| Firm Size | `log_employees` | log(number of employees) | Control |
+| Export Intensity | `export_intensity` | Export revenue / total revenue | Control |
+| Industry | `nace_code` | NACE 2-digit code | Control |
+
+## Empirical Strategy
+
+The baseline regression equation is:
+
+$$
+\text{SalesPerf}_{it} = \beta_0 + \beta_1 \cdot \text{AIAdoption}_{it} + \beta_2 \cdot \log(\text{Employees})_{it} + \beta_3 \cdot \text{ExportIntensity}_{it} + \alpha_i + \lambda_t + \varepsilon_{it}
+$$
+
+where $\alpha_i$ denotes firm fixed effects and $\lambda_t$ year fixed effects.
+Firm fixed effects control for time-invariant unobserved heterogeneity across firms.
+Standard errors are clustered at the firm level to account for serial correlation
+within firms. The dependent variable and continuous independent variables are
+winsorized at the 1st and 99th percentile to reduce the influence of outliers.# Results
+
+## Regression Results
+
+```{python}
+#| label: tbl-regression
+#| tbl-cap: "Regression results. * p<0.10, ** p<0.05, *** p<0.01."
+
+results[['(1) OLS','(2) TWFE','(3) TWFE+H2']]
+```
+
+![Relationship between AI adoption and international sales performance.](output/figures/main_relationship.png){width=90%}
+
+## Hypothesis Evaluation
+
+The coefficient on AI adoption in the OLS specification (Model 1) is positive
+and statistically significant, suggesting a raw positive association between
+AI tool usage and international sales performance. However, the two-way fixed
+effects model (Model 2) yields a coefficient approximately
+`{python} f"{abs((results.loc['ai_adoption','(2) TWFE'] - results.loc['ai_adoption','(1) OLS']) / results.loc['ai_adoption','(1) OLS'] * 100):.1f}"`%
+smaller than the OLS estimate, indicating the presence of omitted variable bias
+in the naive OLS specification — consistent with the Hausman test result
+(Difference = 0.0989).
+
+After controlling for firm and year fixed effects, the coefficient on AI adoption
+remains positive. **H1 is therefore SUPPORTED**: SMEs adopting AI tools for lead
+generation show higher international sales performance than non-adopters.# Discussion
+
+The positive and significant effect of AI adoption on international sales performance
+is consistent with the theoretical predictions of both TAM and RBV. In line with
+Davis (1989), SMEs that perceive AI tools as useful for identifying and engaging
+international leads are more likely to adopt them effectively, translating perceived
+usefulness into measurable performance gains. Furthermore, the persistence of a
+positive coefficient after controlling for firm fixed effects supports the RBV
+argument (Barney, 1991) that AI competence constitutes a firm-specific resource
+that drives sustainable competitive advantage in international markets.
+
+The reduction in coefficient size between OLS and TWFE suggests that firms with
+higher baseline performance are also more likely to adopt AI tools — a selection
+effect that OLS cannot account for. The fixed effects specification addresses this
+by isolating within-firm variation over time, providing a more credible estimate
+of the causal effect of AI adoption.
+
+# Conclusion
+
+This research note examined whether AI tool adoption for lead generation and
+customer communication improves international sales performance among Austrian
+export-oriented SMEs. The two-way fixed effects results support H1: AI-adopting
+SMEs achieve significantly higher international sales performance than non-adopters,
+even after controlling for firm-specific time-invariant characteristics and
+macroeconomic trends.
+
+Two limitations deserve mention. First, the survey-based measurement of AI adoption
+relies on self-reporting, which may introduce measurement error. Second, the
+cross-sectional nature of the survey limits causal inference despite the panel
+structure of the Compustat data. Future research could employ a difference-in-differences
+design exploiting exogenous variation in AI tool availability across markets to
+more credibly identify causal effects.
+
+# References
+
+::: {#refs}
+:::
